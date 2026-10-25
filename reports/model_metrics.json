@@ -1,0 +1,260 @@
+{
+  "phase": "Phase 3 \u2014 Model Training and Evaluation",
+  "dataset": "Marine Water Quality Classification (Zenodo 19506986)",
+  "provenance": "Synthetic / mathematically derived dataset.",
+  "split": {
+    "n_train": 8000,
+    "n_test": 2000,
+    "seed": 42,
+    "stratified": true
+  },
+  "scenario_A": {
+    "description": "PRIMARY \u2014 4 leakage-free features",
+    "features": [
+      "Temperature",
+      "pH",
+      "Salinity",
+      "Turbidity"
+    ],
+    "leakage_note": "Dissolved_Oxygen, Nitrate, Chlorophyll_a excluded. Residual indirect correlation via Temperature acknowledged.",
+    "best_model": "RandomForest",
+    "results": {
+      "LogisticRegression": {
+        "model": "LogisticRegression",
+        "accuracy": 0.489,
+        "precision": 0.4891,
+        "recall": 0.493,
+        "f1_score": 0.491,
+        "roc_auc": 0.4847,
+        "report": {
+          "Unsafe (0)": {
+            "precision": 0.4889112903225806,
+            "recall": 0.485,
+            "f1-score": 0.48694779116465864,
+            "support": 1000.0
+          },
+          "Safe (1)": {
+            "precision": 0.48908730158730157,
+            "recall": 0.493,
+            "f1-score": 0.4910358565737052,
+            "support": 1000.0
+          },
+          "accuracy": 0.489,
+          "macro avg": {
+            "precision": 0.48899929595494107,
+            "recall": 0.489,
+            "f1-score": 0.48899182386918194,
+            "support": 2000.0
+          },
+          "weighted avg": {
+            "precision": 0.48899929595494107,
+            "recall": 0.489,
+            "f1-score": 0.4889918238691819,
+            "support": 2000.0
+          }
+        }
+      },
+      "DecisionTree": {
+        "model": "DecisionTree",
+        "accuracy": 0.509,
+        "precision": 0.5122,
+        "recall": 0.379,
+        "f1_score": 0.4356,
+        "roc_auc": 0.4994,
+        "report": {
+          "Unsafe (0)": {
+            "precision": 0.5071428571428571,
+            "recall": 0.639,
+            "f1-score": 0.5654867256637168,
+            "support": 1000.0
+          },
+          "Safe (1)": {
+            "precision": 0.5121621621621621,
+            "recall": 0.379,
+            "f1-score": 0.435632183908046,
+            "support": 1000.0
+          },
+          "accuracy": 0.509,
+          "macro avg": {
+            "precision": 0.5096525096525096,
+            "recall": 0.509,
+            "f1-score": 0.5005594547858814,
+            "support": 2000.0
+          },
+          "weighted avg": {
+            "precision": 0.5096525096525096,
+            "recall": 0.509,
+            "f1-score": 0.5005594547858814,
+            "support": 2000.0
+          }
+        }
+      },
+      "RandomForest": {
+        "model": "RandomForest",
+        "accuracy": 0.5135,
+        "precision": 0.5138,
+        "recall": 0.503,
+        "f1_score": 0.5083,
+        "roc_auc": 0.5141,
+        "report": {
+          "Unsafe (0)": {
+            "precision": 0.5132223310479922,
+            "recall": 0.524,
+            "f1-score": 0.5185551707075705,
+            "support": 1000.0
+          },
+          "Safe (1)": {
+            "precision": 0.5137895812053116,
+            "recall": 0.503,
+            "f1-score": 0.5083375442142496,
+            "support": 1000.0
+          },
+          "accuracy": 0.5135,
+          "macro avg": {
+            "precision": 0.513505956126652,
+            "recall": 0.5135000000000001,
+            "f1-score": 0.51344635746091,
+            "support": 2000.0
+          },
+          "weighted avg": {
+            "precision": 0.5135059561266518,
+            "recall": 0.5135,
+            "f1-score": 0.51344635746091,
+            "support": 2000.0
+          }
+        }
+      }
+    }
+  },
+  "scenario_B": {
+    "description": "REFERENCE ONLY \u2014 7 features including target-defining columns",
+    "features": [
+      "Temperature",
+      "pH",
+      "Salinity",
+      "Turbidity",
+      "Dissolved_Oxygen",
+      "Nitrate",
+      "Chlorophyll_a"
+    ],
+    "leakage_warning": "Results are NOT genuine. Target is a deterministic function of Dissolved_Oxygen, Nitrate, and Chlorophyll_a.",
+    "best_model": "LogisticRegression",
+    "results": {
+      "LogisticRegression": {
+        "model": "LogisticRegression",
+        "accuracy": 0.9735,
+        "precision": 0.9629,
+        "recall": 0.985,
+        "f1_score": 0.9738,
+        "roc_auc": 0.9987,
+        "report": {
+          "Unsafe (0)": {
+            "precision": 0.984646878198567,
+            "recall": 0.962,
+            "f1-score": 0.9731917046029337,
+            "support": 1000.0
+          },
+          "Safe (1)": {
+            "precision": 0.9628543499511242,
+            "recall": 0.985,
+            "f1-score": 0.9738012852199703,
+            "support": 1000.0
+          },
+          "accuracy": 0.9735,
+          "macro avg": {
+            "precision": 0.9737506140748455,
+            "recall": 0.9735,
+            "f1-score": 0.973496494911452,
+            "support": 2000.0
+          },
+          "weighted avg": {
+            "precision": 0.9737506140748455,
+            "recall": 0.9735,
+            "f1-score": 0.973496494911452,
+            "support": 2000.0
+          }
+        }
+      },
+      "DecisionTree": {
+        "model": "DecisionTree",
+        "accuracy": 0.9735,
+        "precision": 0.9797,
+        "recall": 0.967,
+        "f1_score": 0.9733,
+        "roc_auc": 0.9976,
+        "report": {
+          "Unsafe (0)": {
+            "precision": 0.9674234945705824,
+            "recall": 0.98,
+            "f1-score": 0.9736711376055638,
+            "support": 1000.0
+          },
+          "Safe (1)": {
+            "precision": 0.9797365754812564,
+            "recall": 0.967,
+            "f1-score": 0.9733266230498239,
+            "support": 1000.0
+          },
+          "accuracy": 0.9735,
+          "macro avg": {
+            "precision": 0.9735800350259194,
+            "recall": 0.9735,
+            "f1-score": 0.9734988803276938,
+            "support": 2000.0
+          },
+          "weighted avg": {
+            "precision": 0.9735800350259194,
+            "recall": 0.9735,
+            "f1-score": 0.9734988803276937,
+            "support": 2000.0
+          }
+        }
+      },
+      "RandomForest": {
+        "model": "RandomForest",
+        "accuracy": 0.971,
+        "precision": 0.9573,
+        "recall": 0.986,
+        "f1_score": 0.9714,
+        "roc_auc": 0.9987,
+        "report": {
+          "Unsafe (0)": {
+            "precision": 0.9855670103092784,
+            "recall": 0.956,
+            "f1-score": 0.9705583756345177,
+            "support": 1000.0
+          },
+          "Safe (1)": {
+            "precision": 0.9572815533980582,
+            "recall": 0.986,
+            "f1-score": 0.9714285714285714,
+            "support": 1000.0
+          },
+          "accuracy": 0.971,
+          "macro avg": {
+            "precision": 0.9714242818536682,
+            "recall": 0.971,
+            "f1-score": 0.9709934735315446,
+            "support": 2000.0
+          },
+          "weighted avg": {
+            "precision": 0.9714242818536684,
+            "recall": 0.971,
+            "f1-score": 0.9709934735315446,
+            "support": 2000.0
+          }
+        }
+      }
+    }
+  },
+  "shap": {
+    "succeeded": true,
+    "model_explained": "RandomForest",
+    "mean_abs_shap": {
+      "Temperature": "[0.02327 0.02327]",
+      "pH": "[0.02237 0.02237]",
+      "Salinity": "[0.02307 0.02307]",
+      "Turbidity": "[0.02084 0.02084]"
+    }
+  }
+}

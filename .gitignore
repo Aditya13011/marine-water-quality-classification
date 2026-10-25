@@ -1,0 +1,90 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# .gitignore — AI-Based Marine Water Quality Classification System
+# ──────────────────────────────────────────────────────────────────────────────
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.virtualenv/
+
+# ── Python bytecode & caches ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ── Pytest ────────────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── Distribution / packaging ──────────────────────────────────────────────────
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Secrets and credentials — NEVER commit these ─────────────────────────────
+.env
+.env.*
+secrets.json
+kaggle.json
+~/.kaggle/
+*.pem
+*.key
+
+# ── Trained model artefacts (large binaries) ─────────────────────────────────
+# Regenerate with: python src/train_model.py
+models/*.pkl
+models/*.joblib
+models/*.h5
+models/*.pt
+models/*.onnx
+
+# ── Pre-split / derived data CSVs (regenerable from raw dataset) ──────────────
+# Regenerate with: python src/data_preprocessing.py
+data/X_train_A.csv
+data/X_train_B.csv
+data/X_test_A.csv
+data/X_test_B.csv
+data/y_train.csv
+data/y_test.csv
+
+# Raw dataset IS committed (489 KB, public domain, Zenodo-archived)
+# data/marine_water_quality.csv  ← keep tracked
+
+# Report PNGs and JSON ARE committed (small, useful for README previews)
+# reports/*.png                  ← keep tracked
+# reports/*.json                 ← keep tracked
+
+# ── Generated HTML/PDF reports ────────────────────────────────────────────────
+reports/*.html
+reports/*.pdf
+
+# ── IDE / editor ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ── OS artefacts ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs and temp files ───────────────────────────────────────────────────────
+*.log
+*.tmp
+*.bak
+*.swp
+tmp/
+temp/

@@ -1,0 +1,111 @@
+{
+  "phase": "Phase 2 \u2014 Data Preprocessing",
+  "dataset_source": "https://zenodo.org/records/19506986",
+  "dataset_provenance": "Mathematically derived / synthetic.  Not real laboratory data.  Target `is_safe` is a deterministic function of Dissolved_Oxygen, Nitrate, and Chlorophyll_a thresholds.",
+  "random_seed": 42,
+  "test_size_fraction": 0.2,
+  "stratified": true,
+  "total_records": 10000,
+  "n_train": 8000,
+  "n_test": 2000,
+  "target_column": "is_safe",
+  "target_classes": {
+    "0": "Unsafe",
+    "1": "Safe"
+  },
+  "train_class_dist": {
+    "0": 4000,
+    "1": 4000
+  },
+  "test_class_dist": {
+    "0": 1000,
+    "1": 1000
+  },
+  "preprocessing_pipeline": [
+    {
+      "step": "SimpleImputer",
+      "strategy": "median",
+      "note": "Fitted on training data only."
+    },
+    {
+      "step": "StandardScaler",
+      "note": "Zero-mean unit-variance. Fitted on training data only."
+    }
+  ],
+  "leakage_exclusion": {
+    "threshold_defining_columns": [
+      "Dissolved_Oxygen",
+      "Nitrate",
+      "Chlorophyll_a"
+    ],
+    "explanation": "Dissolved_Oxygen, Nitrate, and Chlorophyll_a directly define the target via a hard threshold rule.  Including them would allow trivial rule-matching rather than genuine learning.  They are EXCLUDED from Scenario A (primary model).",
+    "residual_leakage_note": "Temperature is physically correlated with Dissolved Oxygen (temperature-dependent gas solubility).  This indirect correlation may carry weak residual signal. This is acknowledged but not eliminated \u2014 documentation is provided rather than removal, as Temperature is a legitimate marine quality indicator."
+  },
+  "scenarios": {
+    "A": {
+      "features": [
+        "Temperature",
+        "pH",
+        "Salinity",
+        "Turbidity"
+      ],
+      "n_features": 4,
+      "n_train": 8000,
+      "n_test": 2000,
+      "train_scaled_mean": {
+        "Temperature": -0.0,
+        "pH": -0.0,
+        "Salinity": -0.0,
+        "Turbidity": -0.0
+      },
+      "train_scaled_std": {
+        "Temperature": 1.0001,
+        "pH": 1.0001,
+        "Salinity": 1.0001,
+        "Turbidity": 1.0001
+      }
+    },
+    "B": {
+      "features": [
+        "Temperature",
+        "pH",
+        "Salinity",
+        "Turbidity",
+        "Dissolved_Oxygen",
+        "Nitrate",
+        "Chlorophyll_a"
+      ],
+      "n_features": 7,
+      "n_train": 8000,
+      "n_test": 2000,
+      "train_scaled_mean": {
+        "Temperature": -0.0,
+        "pH": -0.0,
+        "Salinity": -0.0,
+        "Turbidity": -0.0,
+        "Dissolved_Oxygen": -0.0,
+        "Nitrate": -0.0,
+        "Chlorophyll_a": -0.0
+      },
+      "train_scaled_std": {
+        "Temperature": 1.0001,
+        "pH": 1.0001,
+        "Salinity": 1.0001,
+        "Turbidity": 1.0001,
+        "Dissolved_Oxygen": 1.0001,
+        "Nitrate": 1.0001,
+        "Chlorophyll_a": 1.0001
+      }
+    }
+  },
+  "output_files": {
+    "X_train_A.csv": "Scenario A train features (scaled)",
+    "X_test_A.csv": "Scenario A test features (scaled)",
+    "X_train_B.csv": "Scenario B train features (scaled)",
+    "X_test_B.csv": "Scenario B test features (scaled)",
+    "y_train.csv": "Training labels",
+    "y_test.csv": "Test labels",
+    "pipeline_scenario_A.joblib": "Fitted preprocessing pipeline \u2014 A",
+    "pipeline_scenario_B.joblib": "Fitted preprocessing pipeline \u2014 B"
+  }
+}

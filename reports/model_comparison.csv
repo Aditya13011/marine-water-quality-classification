@@ -1,0 +1,7 @@
+scenario,model,accuracy,precision,recall,f1_score,roc_auc
+A (primary),LogisticRegression,0.489,0.4891,0.493,0.491,0.4847
+A (primary),DecisionTree,0.509,0.5122,0.379,0.4356,0.4994
+A (primary),RandomForest,0.5135,0.5138,0.503,0.5083,0.5141
+B (reference — leakage),LogisticRegression,0.9735,0.9629,0.985,0.9738,0.9987
+B (reference — leakage),DecisionTree,0.9735,0.9797,0.967,0.9733,0.9976
+B (reference — leakage),RandomForest,0.971,0.9573,0.986,0.9714,0.9987
