@@ -4,6 +4,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.30%2B-FF4B4B?logo=streamlit)](https://streamlit.io/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3%2B-F7931E?logo=scikit-learn)](https://scikit-learn.org/)
 [![License](https://img.shields.io/badge/Dataset-Zenodo%2019506986-blue)](https://zenodo.org/records/19506986)
+[![Deploy](https://img.shields.io/badge/Deploy%20on-Streamlit%20Cloud-FF4B4B?logo=streamlit)](https://share.streamlit.io/)
 
 An end-to-end machine learning system that classifies marine water samples as **Safe** or **Unsafe** for aquatic life, with SHAP-based interpretability and an interactive Streamlit dashboard. Built as an academic computer engineering project.
 
@@ -23,9 +24,10 @@ An end-to-end machine learning system that classifies marine water samples as **
 8. [Model Results](#model-results)
 9. [Target Leakage Explanation](#target-leakage-explanation)
 10. [Dashboard Screenshots](#dashboard-screenshots)
-11. [Limitations](#limitations)
-12. [Future Scope](#future-scope)
-13. [Responsible Use Disclaimer](#responsible-use-disclaimer)
+11. [Streamlit Cloud Deployment](#streamlit-cloud-deployment)
+12. [Limitations](#limitations)
+13. [Future Scope](#future-scope)
+14. [Responsible Use Disclaimer](#responsible-use-disclaimer)
 
 ---
 
@@ -323,7 +325,86 @@ Including `Dissolved_Oxygen`, `Nitrate`, or `Chlorophyll_a` as model features ca
 
 ---
 
+## Streamlit Cloud Deployment
+
+This project is designed to run on [Streamlit Community Cloud](https://share.streamlit.io/) with **no manual model upload** required. Model artifacts are regenerated automatically from the committed raw dataset on first startup.
+
+### How to Deploy
+
+#### Step 1 — Sign in to Streamlit Cloud
+
+Go to **https://share.streamlit.io/** and sign in with your GitHub account (`Aditya13011`).
+
+#### Step 2 — Create a New App
+
+Click **"New app"** and fill in the following exact settings:
+
+| Field | Value |
+|-------|-------|
+| **Repository** | `Aditya13011/marine-water-quality-classification` |
+| **Branch** | `main` |
+| **Main file path** | `app.py` |
+| **App URL** (optional) | Choose a custom slug, e.g. `marine-water-quality` |
+
+Leave **Python version** at the default (3.11) and click **Deploy**.
+
+#### Step 3 — First Cold-Start (≈ 60–120 seconds)
+
+On first deployment Streamlit Cloud will:
+
+1. Install all packages from `requirements.txt` (~2–3 min)
+2. Run `app.py` which calls `setup_model.ensure_model_ready()`
+3. That function runs `src/data_preprocessing.py` → `src/train_model.py`
+4. Model is saved to `models/selected_model_scenario_A.joblib` (ephemeral cloud disk)
+5. The dashboard loads and is ready
+
+> ⚠️ **Important:** Streamlit Community Cloud uses **ephemeral (temporary) storage**. The trained `.joblib` file is only stored for the duration of the running instance. If the app is idle for a long period and the instance restarts, the model will be regenerated automatically on the next visit (another ~60–120 s spinner). This is expected behaviour.
+
+All subsequent page loads and reruns are **instant** — the model is cached in memory via `@st.cache_resource`.
+
+#### Step 4 — Verify Deployment
+
+Once deployed, the public URL will be:
+```
+https://[your-chosen-slug].streamlit.app
+```
+
+Verify:
+- ✅ Home page loads with dataset metrics (10,000 records, 50/50 class balance)
+- ✅ **Prediction** page accepts inputs and returns Safe/Unsafe with probabilities
+- ✅ **Data Analytics** page shows 6 EDA charts
+- ✅ **Model Performance** page shows confusion matrix, SHAP summary, metrics table
+- ✅ **About Project** page loads static content
+
+---
+
+### Troubleshooting Common Deployment Errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `FileNotFoundError: Model file not found` | Cold-start model setup failed | Check Streamlit Cloud logs → look for errors in `data_preprocessing.py` or `train_model.py` |
+| `ModuleNotFoundError: No module named 'shap'` | Dependency not installed | Confirm `shap>=0.44.0` is in `requirements.txt` and push again |
+| `AssertionError: Unexpected shape` | Dataset CSV corrupted or truncated | Re-download `marine_water_quality.csv` from Zenodo and commit |
+| App stuck on spinner > 5 minutes | Training hung (unlikely) | Click **Reboot app** in the Streamlit Cloud dashboard |
+| `st.cache_resource` not caching | Old Streamlit version | Ensure `streamlit>=1.30.0` in `requirements.txt` |
+| `UnicodeDecodeError` on `.gitignore` read | File opened without `encoding='utf-8'` | Already fixed in `tests/test_project_integrity.py` |
+
+---
+
+### Local vs Cloud — Feature Comparison
+
+| Feature | Local (`localhost:8501`) | Streamlit Community Cloud |
+|---------|--------------------------|---------------------------|
+| Model `.joblib` persistence | Persists on disk | Ephemeral — regenerated on cold start |
+| First-run training | Pre-built (already done) | ≈ 60–120 s auto-setup on first visit |
+| Subsequent loads | Instant | Instant (cached in memory) |
+| Data privacy | Fully local | Input values sent to Streamlit's servers |
+| Custom domain | No | Yes (via Streamlit settings) |
+
+---
+
 ## Limitations
+
 
 | Limitation | Detail |
 |------------|--------|

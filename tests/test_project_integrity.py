@@ -14,7 +14,7 @@ class TestRequirementsTxt:
         path = os.path.join(root, "requirements.txt")
         assert os.path.isfile(path), "requirements.txt not found"
         packages = []
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith("#"):
@@ -63,7 +63,7 @@ class TestGitignore:
     def _read_gitignore(self, root):
         path = os.path.join(root, ".gitignore")
         assert os.path.isfile(path), ".gitignore not found"
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             return f.read()
 
     def test_venv_excluded(self, root):
@@ -106,6 +106,7 @@ class TestProjectStructure:
         "README.md",
         ".gitignore",
         "src/prediction.py",
+        "src/setup_model.py",
         "src/train_model.py",
         "src/data_preprocessing.py",
         "src/eda.py",

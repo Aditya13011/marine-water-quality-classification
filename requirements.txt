@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # requirements.txt
-# AI-Based Water Quality Prediction and Potability Analysis System
-# Updated: Phase 4 — Streamlit Dashboard
+# AI-Based Marine Water Quality Classification System
+# Used by Streamlit Community Cloud to build the deployment environment.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Core data handling ────────────────────────────────────────────────────────
@@ -17,10 +17,12 @@ plotly>=5.18.0
 
 # ── Model interpretability ────────────────────────────────────────────────────
 shap>=0.44.0
-xgboost>=2.0.0
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
 streamlit>=1.30.0
 
-# ── Testing (development only) ────────────────────────────────────────────────
-pytest>=8.0.0
+# ─────────────────────────────────────────────────────────────────────────────
+# Dev-only dependencies (not needed on Streamlit Community Cloud):
+#   pytest>=8.0.0   → install locally with: pip install pytest
+#   xgboost         → not used in this project
+# ─────────────────────────────────────────────────────────────────────────────

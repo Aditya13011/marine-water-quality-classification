@@ -1,6 +1,13 @@
 """
 app.py — Home Dashboard
 AI-Based Marine Water Quality Classification System
+
+── Cloud Deployment Note ─────────────────────────────────────────────────────
+On first cold-start (Streamlit Community Cloud), model .joblib files are
+regenerated from the committed raw dataset via src/setup_model.py.
+This takes ~60-120 seconds and runs exactly once (cached by Streamlit).
+Subsequent page loads are instant.
+──────────────────────────────────────────────────────────────────────────────
 """
 
 import os, sys, json
@@ -18,6 +25,30 @@ st.set_page_config(
 # ── shared path helper ────────────────────────────────────────────────────────
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(ROOT, "src"))
+
+# ── Cloud startup: generate model artifacts if absent ─────────────────────────
+# @st.cache_resource ensures this function body executes ONCE per server
+# lifecycle — not on every page refresh or navigation.
+@st.cache_resource(show_spinner=False)
+def _bootstrap_model():
+    """
+    Regenerate preprocessing splits and train the Random Forest pipeline
+    from the committed raw CSV if the model artifact is missing.
+    Safe to call on every import — returns immediately if model exists.
+    """
+    from setup_model import ensure_model_ready, model_exists
+    if not model_exists():
+        # Only show the spinner UI during actual training
+        with st.spinner(
+            "⏳ **First-time setup:** Training the Random Forest model from the raw "
+            "dataset. This takes ~60–120 s and will not repeat on future visits…"
+        ):
+            ensure_model_ready()
+    else:
+        ensure_model_ready()   # instant — model already present
+    return True
+
+_bootstrap_model()
 
 # ── global CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
