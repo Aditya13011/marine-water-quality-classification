@@ -294,13 +294,12 @@ fig_cm = go.Figure(go.Heatmap(
     colorscale=[[0, "#0a2a4a"], [1, "#0d9488"]],
     showscale=False,
 ))
-fig_cm.update_layout(
-    **PLOTLY_DARK,
-    height=330,
-    margin=dict(t=20, b=20, l=40, r=20),
-    font=dict(size=14, color="#e2f0ff"),
-)
-st.plotly_chart(fig_cm, use_container_width=True)
+# PLOTLY_DARK already contains font=dict(color=...). Passing font= again as an
+# explicit kwarg causes TypeError in Plotly 7.x ("multiple values for keyword
+# argument 'font'"). Build a merged dict so font is passed exactly once.
+_cm_layout = {**PLOTLY_DARK, "font": dict(size=14, color="#e2f0ff")}
+fig_cm.update_layout(**_cm_layout, height=330, margin=dict(t=20, b=20, l=40, r=20))
+st.plotly_chart(fig_cm, use_container_width=True, key="interactive_cm_A")
 
 # ──────────────────────────────────────────────────────────────────────────────
 # SHAP summary

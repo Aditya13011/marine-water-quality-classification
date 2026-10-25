@@ -145,7 +145,7 @@ with c1:
                           font_color="#94a3b8", showarrow=False)],
         **PLOTLY_DARK, height=320, margin=dict(t=20,b=10,l=10,r=10),
     )
-    st.plotly_chart(fig_pie, use_container_width=True)
+    st.plotly_chart(fig_pie, use_container_width=True, key="class_dist_pie")
 with c2:
     fig_bar = px.bar(
         x=["Unsafe (0)", "Safe (1)"], y=[vc[0], vc[1]],
@@ -158,7 +158,7 @@ with c2:
                           textfont=dict(color="#e2f0ff"))
     fig_bar.update_layout(**PLOTLY_DARK, showlegend=False, height=320,
                           margin=dict(t=20,b=20,l=20,r=20))
-    st.plotly_chart(fig_bar, use_container_width=True)
+    st.plotly_chart(fig_bar, use_container_width=True, key="class_dist_bar")
 
 # ── 2. Feature distributions ──────────────────────────────────────────────────
 st.markdown('<div class="section-heading">📈 Feature Distributions by Class</div>',
@@ -185,7 +185,7 @@ with tab_safe:
                               xaxis_title=feat, yaxis_title="Count",
                               legend=dict(font=dict(color="#e2f0ff")),
                               height=280, margin=dict(t=40,b=30,l=30,r=10))
-            rcols[j].plotly_chart(fig, use_container_width=True)
+            rcols[j].plotly_chart(fig, use_container_width=True, key=f"hist_safe_{feat}")
 
 with tab_all:
     st.warning("⚠️ Columns marked ⚠️ directly define the target — they are shown here for EDA context only.")
@@ -207,7 +207,7 @@ with tab_all:
                               xaxis_title=feat, yaxis_title="Count",
                               legend=dict(font=dict(color="#e2f0ff")),
                               height=280, margin=dict(t=40,b=30,l=30,r=10))
-            rcols[j].plotly_chart(fig, use_container_width=True)
+            rcols[j].plotly_chart(fig, use_container_width=True, key=f"hist_all_{feat}")
 
 # ── 3. Boxplots ───────────────────────────────────────────────────────────────
 st.markdown('<div class="section-heading">📦 Feature Boxplots by Class</div>',
@@ -224,7 +224,7 @@ for i, feat in enumerate(SAFE_FEATS):
     fig.update_layout(**PLOTLY_DARK, showlegend=False,
                       title=dict(text=feat, font=dict(color="#22d3ee")),
                       height=300, margin=dict(t=40,b=30,l=30,r=10))
-    box_cols[i].plotly_chart(fig, use_container_width=True)
+    box_cols[i].plotly_chart(fig, use_container_width=True, key=f"box_{feat}")
 
 # ── 4. Correlation heatmap ────────────────────────────────────────────────────
 st.markdown('<div class="section-heading">🔥 Correlation Heatmap</div>',
@@ -246,7 +246,7 @@ fig_heat.update_layout(
     coloraxis_colorbar=dict(tickfont=dict(color="#e2f0ff"),
                             title=dict(font=dict(color="#94a3b8"))),
 )
-st.plotly_chart(fig_heat, use_container_width=True)
+st.plotly_chart(fig_heat, use_container_width=True, key="corr_heatmap")
 st.info("💡 Notice: Dissolved_Oxygen, Nitrate, and Chlorophyll_a show r > 0.9 with `is_safe`, "
         "revealing the deterministic leakage. The four Scenario A features show r ≈ 0.")
 
@@ -275,7 +275,7 @@ fig_corr.update_layout(
     xaxis_title="Correlation (r)",
     height=380, margin=dict(t=50,b=30,l=30,r=80),
 )
-st.plotly_chart(fig_corr, use_container_width=True)
+st.plotly_chart(fig_corr, use_container_width=True, key="feat_target_corr")
 
 # ── 6. Summary statistics table ───────────────────────────────────────────────
 st.markdown('<div class="section-heading">📋 Summary Statistics</div>',
