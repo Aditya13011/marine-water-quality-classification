@@ -85,7 +85,7 @@ if not os.path.isfile(metrics_path):
     st.error("❌ reports/model_metrics.json not found. Run src/train_model.py first.")
     st.stop()
 
-with open(metrics_path) as f:
+with open(metrics_path, encoding="utf-8") as f:
     meta = json.load(f)
 
 comp_df = pd.read_csv(csv_path) if os.path.isfile(csv_path) else None
@@ -258,7 +258,7 @@ if os.path.isfile(cm_path):
 else:
     st.warning("Confusion matrix chart not found. Run src/train_model.py to regenerate.")
 
-# ── Interactive confusion matrix for RF Scenario A ────────────────────────────
+# ── Interactive confusion matrix for RF Scenario A ──────────────────────────
 st.markdown("**Interactive Confusion Matrix — Random Forest, Scenario A**")
 # Reconstruct from report data
 rep = results_A["RandomForest"]["report"]
@@ -269,16 +269,37 @@ tp_approx = int(rep["Safe (1)"]["recall"] * rep["Safe (1)"]["support"])
 
 cm_vals   = [[tn_approx, fp_approx], [fn_approx, tp_approx]]
 cm_labels = [["TN", "FP"], ["FN", "TP"]]
-annots    = [[f"{cm_vals[i][j]}<br><span style='font-size:10px'>{cm_labels[i][j]}</span>"
-              for j in range(2)] for i in range(2)]
+
+# Plain-text annotations — go.Heatmap texttemplate does NOT support HTML tags.
+# Use '\n' separator; Plotly renders this correctly on all versions (>=5.x, 7.x).
+annots = [
+    [f"{cm_vals[i][j]}\n{cm_labels[i][j]}" for j in range(2)]
+    for i in range(2)
+]
+
+# customdata carries the label string for the hover tooltip
+custom = [
+    [f"{cm_labels[i][j]}: {cm_vals[i][j]}" for j in range(2)]
+    for i in range(2)
+]
+
 fig_cm = go.Figure(go.Heatmap(
-    z=cm_vals, x=["Pred Unsafe", "Pred Safe"], y=["Act Unsafe", "Act Safe"],
-    text=annots, texttemplate="%{text}",
-    colorscale=[[0,"#0a2a4a"],[1,"#0d9488"]],
+    z=cm_vals,
+    x=["Pred Unsafe", "Pred Safe"],
+    y=["Act Unsafe", "Act Safe"],
+    text=annots,
+    texttemplate="%{text}",
+    customdata=custom,
+    hovertemplate="%{customdata}<extra></extra>",
+    colorscale=[[0, "#0a2a4a"], [1, "#0d9488"]],
     showscale=False,
 ))
-fig_cm.update_layout(**PLOTLY_DARK, height=330, margin=dict(t=20,b=20,l=40,r=20),
-                     font=dict(size=14, color="#e2f0ff"))
+fig_cm.update_layout(
+    **PLOTLY_DARK,
+    height=330,
+    margin=dict(t=20, b=20, l=40, r=20),
+    font=dict(size=14, color="#e2f0ff"),
+)
 st.plotly_chart(fig_cm, use_container_width=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
