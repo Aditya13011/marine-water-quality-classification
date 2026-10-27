@@ -56,7 +56,7 @@ hr { border-color:#1e3a5f !important; }
 """, unsafe_allow_html=True)
 
 with st.sidebar:
-    st.markdown("## 🌊 Marine Water AI")
+    st.markdown("## 🌊 MarineGuard AI")
     st.markdown("---")
     st.markdown("**📈 Model Performance** ← you are here")
 
@@ -71,18 +71,24 @@ st.markdown("""
     📈 Model Performance
   </div>
   <div style='color:#94a3b8; font-size:0.95rem; margin-top:6px;'>
-    All metrics loaded from <code>reports/model_metrics.json</code> and
-    <code>reports/model_comparison.csv</code> — verified against training output.
+    All metrics loaded from <code>reports/model_metrics_enhanced.json</code> — verified against training output.
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── load reports ──────────────────────────────────────────────────────────────
-metrics_path = os.path.join(ROOT, "reports", "model_metrics.json")
-csv_path     = os.path.join(ROOT, "reports", "model_comparison.csv")
+# ── load reports (prefer enhanced JSON, fall back to legacy) ──────────────────
+_enhanced_path = os.path.join(ROOT, "reports", "model_metrics_enhanced.json")
+_legacy_path   = os.path.join(ROOT, "reports", "model_metrics.json")
+metrics_path   = _enhanced_path if os.path.isfile(_enhanced_path) else _legacy_path
+csv_path       = os.path.join(ROOT, "reports", "cv_results.csv")
+if not os.path.isfile(csv_path):
+    csv_path   = os.path.join(ROOT, "reports", "model_comparison.csv")
 
 if not os.path.isfile(metrics_path):
-    st.error("❌ reports/model_metrics.json not found. Run src/train_model.py first.")
+    st.error(
+        "❌ Model metrics not found.  "
+        "Run `python src/train_model_enhanced.py` to regenerate."
+    )
     st.stop()
 
 with open(metrics_path, encoding="utf-8") as f:
@@ -124,14 +130,14 @@ st.markdown('<div class="section-heading">🏆 Scenario A — Model Metrics (Hel
             unsafe_allow_html=True)
 
 # Metric cards for best model
-rf_m = results_A["RandomForest"]
+best_m = results_A.get(best_A, list(results_A.values())[0])
 ma1,ma2,ma3,ma4,ma5 = st.columns(5)
-ma1.metric("Accuracy",  f"{rf_m['accuracy']*100:.2f}%",
-           delta="Best: RandomForest", delta_color="off")
-ma2.metric("Precision", f"{rf_m['precision']*100:.2f}%")
-ma3.metric("Recall",    f"{rf_m['recall']*100:.2f}%")
-ma4.metric("F1-Score",  f"{rf_m['f1_score']*100:.2f}%")
-ma5.metric("ROC-AUC",   f"{rf_m['roc_auc']*100:.2f}%")
+ma1.metric("Accuracy",  f"{best_m['accuracy']*100:.2f}%",
+           delta=f"Best: {best_A}", delta_color="off")
+ma2.metric("Precision", f"{best_m['precision']*100:.2f}%")
+ma3.metric("Recall",    f"{best_m['recall']*100:.2f}%")
+ma4.metric("F1-Score",  f"{best_m['f1_score']*100:.2f}%")
+ma5.metric("ROC-AUC",   f"{best_m['roc_auc']*100:.2f}%")
 
 st.info(
     "ℹ️ **Context**: ~51% accuracy is near random chance on a 50/50 balanced dataset. "
@@ -256,12 +262,13 @@ if os.path.isfile(cm_path):
     st.image(cm_path, use_container_width=True,
              caption="Top row: Scenario A (Primary) | Bottom row: Scenario B (Reference only)")
 else:
-    st.warning("Confusion matrix chart not found. Run src/train_model.py to regenerate.")
+    st.warning("Confusion matrix chart not found. Run `python src/train_model_enhanced.py` to regenerate.")
 
 # ── Interactive confusion matrix for RF Scenario A ──────────────────────────
-st.markdown("**Interactive Confusion Matrix — Random Forest, Scenario A**")
+st.markdown(f"**Interactive Confusion Matrix — {best_A}, Scenario A**")
 # Reconstruct from report data
-rep = results_A["RandomForest"]["report"]
+_cm_model_results = results_A.get(best_A, list(results_A.values())[0])
+rep = _cm_model_results["report"]
 tn_approx = int(rep["Unsafe (0)"]["recall"] * rep["Unsafe (0)"]["support"])
 fp_approx = int(rep["Unsafe (0)"]["support"]) - tn_approx
 fn_approx = int(rep["Safe (1)"]["support"]) - int(rep["Safe (1)"]["recall"] * rep["Safe (1)"]["support"])
@@ -347,7 +354,7 @@ if shap_info.get("succeeded"):
         shap_png = os.path.join(ROOT, "reports", "shap_summary.png")
         if os.path.isfile(shap_png):
             st.image(shap_png, use_container_width=True,
-                     caption="SHAP Beeswarm — RandomForest, Scenario A, n=200 test samples")
+                     caption=f"SHAP Beeswarm — {best_A}, Scenario A")
         else:
             st.warning("shap_summary.png not found.")
 
@@ -358,7 +365,7 @@ if shap_info.get("succeeded"):
         "no single feature dominates, and all contributions are marginal."
     )
 else:
-    st.warning("SHAP analysis was not run or failed. Run src/train_model.py to regenerate.")
+    st.warning("SHAP analysis was not run or failed. Run `python src/train_model_enhanced.py` to regenerate.")
 
 # ── Saved model comparison chart ─────────────────────────────────────────────
 st.markdown("---")
@@ -374,10 +381,10 @@ else:
 # ── Feature importance chart ──────────────────────────────────────────────────
 fi_path = os.path.join(ROOT, "reports", "feature_importance.png")
 if os.path.isfile(fi_path):
-    st.markdown('<div class="section-heading">🌲 Random Forest Feature Importance (Gini)</div>',
+    st.markdown('<div class="section-heading">🌲 Feature Importance (Gini / Permutation)</div>',
                 unsafe_allow_html=True)
     st.image(fi_path, use_container_width=False,
-             caption="Gini importance — RandomForest, Scenario A")
+             caption=f"Feature importance — {best_A}, Scenario A")
 
 st.markdown("---")
 st.markdown("""

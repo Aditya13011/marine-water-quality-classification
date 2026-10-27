@@ -335,7 +335,9 @@ Adding Dissolved Oxygen, Nitrate, and Chlorophyll-a causes accuracy to jump from
 ~51% to ~97%. These three features <i>directly define</i> the target via a hard
 threshold rule. Including them lets the model reverse-engineer the label rather than
 learn from water quality signals. This is textbook target leakage.<br><br>
-<b>This result must NOT be presented as genuine model performance.</b>
+<b>This result is NOT genuine predictive performance and must NOT be
+presented as real model quality or cited in any evaluation context.</b>
+⚠️ Scenario B exists solely to quantify the leakage effect for educational purposes.
 </div>
 """, unsafe_allow_html=True)
 

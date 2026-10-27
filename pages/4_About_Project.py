@@ -52,7 +52,7 @@ hr { border-color:#1e3a5f !important; }
 """, unsafe_allow_html=True)
 
 with st.sidebar:
-    st.markdown("## 🌊 Marine Water AI")
+    st.markdown("## 🌊 MarineGuard AI")
     st.markdown("---")
     st.markdown("**ℹ️ About Project** ← you are here")
 
@@ -99,9 +99,9 @@ objectives = [
     ("1", "Download and verify a 10,000-record marine water quality classification dataset from Zenodo."),
     ("2", "Perform exploratory data analysis and document dataset provenance and limitations."),
     ("3", "Design a leakage-aware feature engineering strategy that excludes target-defining columns from Scenario A."),
-    ("4", "Build and evaluate three machine learning classifiers: Logistic Regression, Decision Tree, and Random Forest."),
+    ("4", "Compare six machine learning classifiers (Logistic Regression, Decision Tree, Random Forest, ExtraTrees, LinearSVC, XGBoost) using 5-fold cross-validation and held-out test evaluation."),
     ("5", "Apply SHAP interpretability analysis to explain feature contributions in the selected model."),
-    ("6", "Deploy an interactive Streamlit dashboard that communicates results and limitations transparently."),
+    ("6", "Deploy a 9-page interactive Streamlit dashboard that communicates results, limitations, anomaly detection, decision support, and geospatial monitoring transparently."),
 ]
 obj_cols = st.columns(2)
 for i, (num, text) in enumerate(objectives):
@@ -164,8 +164,8 @@ st.markdown('<div class="section-heading">🔬 Methodology</div>',
 phases = [
     ("Phase 1", "Dataset Inspection", "Downloaded dataset from Zenodo. Verified 10,000 records, 9 columns, 0 missing values, 0 duplicates, 50/50 class balance. Documented synthetic provenance."),
     ("Phase 2", "EDA & Preprocessing", "Generated 6 EDA charts. Identified target-defining columns (DO, NO₃, Chl_a). Designed two-scenario feature split. Applied stratified 80/20 train-test split (seed=42). Fitted SimpleImputer + StandardScaler pipeline on training data only."),
-    ("Phase 3", "Model Training & SHAP", "Trained Logistic Regression, Decision Tree, Random Forest on Scenario A (4 features) and Scenario B (7 features). Evaluated on held-out test set. Applied SHAP TreeExplainer to Random Forest. Saved complete pipelines (preprocessor + model)."),
-    ("Phase 4", "Dashboard", "Built 5-section Streamlit dashboard: Home, Prediction, Data Analytics, Model Performance, About. All metrics loaded from saved files — not hardcoded."),
+    ("Phase 3", "Model Training & SHAP", "Trained 6 classifiers (Logistic Regression, Decision Tree, Random Forest, ExtraTrees, LinearSVC, XGBoost) on Scenario A (4 features) and Scenario B (7 features) using 5-fold StratifiedKFold CV + RandomizedSearchCV. Evaluated all models on held-out test set. Applied SHAP TreeExplainer. Saved full sklearn Pipeline (imputer → scaler → best classifier)."),
+    ("Phase 4", "Dashboard", "Built 9-section Streamlit dashboard: Home, Prediction, Data Analytics, Model Performance, About, Data Sources, Monitoring Map, Trends & Anomalies, Decision Support. All metrics loaded dynamically from saved report files — not hardcoded."),
 ]
 for pnum, ptitle, pdesc in phases:
     st.markdown(f"""
@@ -217,8 +217,8 @@ water quality indicator.
 st.markdown('<div class="section-heading">🛠️ Technology Stack</div>',
             unsafe_allow_html=True)
 techs = [
-    "Python 3.14.6", "Streamlit", "Pandas", "NumPy",
-    "Scikit-learn", "joblib", "SHAP 0.54.1",
+    "Python 3.9+", "Streamlit", "Pandas", "NumPy",
+    "Scikit-learn", "XGBoost", "joblib", "SHAP",
     "Matplotlib", "Seaborn", "Plotly",
 ]
 chips = " ".join(f'<span class="tech-chip">{t}</span>' for t in techs)
@@ -229,21 +229,23 @@ st.markdown('<div class="section-heading">🤖 Model Selection Rationale</div>',
             unsafe_allow_html=True)
 st.markdown("""
 <div class="card">
-The <b>Random Forest Classifier</b> was selected as the primary Scenario A model based
-on F1-score on the held-out test set (F1 = 0.5083, Accuracy = 51.35%, ROC-AUC = 51.41%).
+The production Scenario A model is selected by <b>5-fold cross-validation F1-score</b>
+on the training set, then evaluated exactly once on the 2,000-sample held-out test set.
 
 <br><br>
 
-| Model | Accuracy | F1-Score | ROC-AUC | Notes |
-|-------|----------|----------|---------|-------|
-| Logistic Regression | 48.90% | 49.10% | 48.47% | Linear boundary; below 50% baseline |
-| Decision Tree | 50.90% | 43.56% | 49.94% | Low recall (37.9%) — misses many Safe samples |
-| **Random Forest ✅** | **51.35%** | **50.83%** | **51.41%** | Best on all metrics; supports SHAP interpretation |
+| Model | CV F1 (mean±std) | Test Accuracy | Test F1 | ROC-AUC |
+|-------|-----------------|--------------|---------|----------|
+| Logistic Regression | 0.4984 ± 0.0043 | 48.85% | 48.85% | 48.9% |
+| Decision Tree | 0.4880 ± 0.0095 | 50.65% | 50.22% | 50.3% |
+| Random Forest | 0.4962 ± 0.0057 | 49.70% | 49.61% | 49.8% |
+| ExtraTrees | 0.5003 ± 0.0048 | 50.60% | 50.60% | 50.3% |
+| LinearSVC | 0.5030 ± 0.0040 | 50.75% | 50.75% | 50.9% |
+| <b>XGBoost ✅</b> | <b>0.5069 ± 0.0045</b> | <b>51.45%</b> | <b>51.45%</b> | <b>50.3%</b> |
 
 <br>
-<b>Selection criterion</b>: F1-score on held-out test set (stratified, 2,000 samples).
-F1 is chosen over accuracy because it balances precision and recall, which is important
-for safety-classification tasks.
+<b>Selection criterion</b>: highest mean CV F1 across 5 folds (training data only —
+the test set was never used for model selection).
 
 <br><br>
 <b>Why all accuracies are near 50%</b>: The four Scenario A features have near-zero

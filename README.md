@@ -8,7 +8,7 @@
 
 An end-to-end machine learning system that classifies marine water samples as **Safe** or **Unsafe** for aquatic life, with SHAP-based interpretability and an interactive Streamlit dashboard. Built as an academic computer engineering project.
 
-> ⚠️ **Academic honesty notice**: The underlying dataset is **synthetic/mathematically derived** (not real-world field data). The selected Scenario A model performs at approximately **51.35% accuracy** — near random chance — because the safe input features have negligible correlation with the synthetic target. This is expected, documented, and stated clearly throughout the project.
+> ⚠️ **Academic honesty notice**: The underlying dataset is **synthetic/mathematically derived** (not real-world field data). The selected Scenario A model performs at approximately **51.45% accuracy** — near random chance — because the safe input features have negligible correlation with the synthetic target. This is expected, documented, and stated clearly throughout the project.
 
 ---
 
@@ -103,21 +103,30 @@ marine-water-quality-classification/
 │   ├── 1_Marine_Water_Quality_Prediction.py   ← Interactive prediction simulator
 │   ├── 2_Data_Analytics.py                    ← EDA charts and statistics
 │   ├── 3_Model_Performance.py                 ← Metrics, confusion matrix, SHAP
-│   └── 4_About_Project.py                     ← Documentation and methodology
+│   ├── 4_About_Project.py                     ← Documentation and methodology
+│   ├── 5_Model_Laboratory.py                  ← 6-algorithm comparison, CV, permutation importance
+│   ├── 6_Marine_Data_Sources.py               ← Data sources and upload
+│   ├── 7_Marine_Monitoring_Map.py             ← Geospatial monitoring map
+│   ├── 8_Trends_and_Anomalies.py             ← Isolation Forest anomaly detection
+│   └── 9_Decision_Support.py                  ← Decision support + PDF/CSV reports
 │
 ├── src/
-│   ├── prediction.py           ← Shared prediction utility (loaded by pages)
-│   ├── train_model.py          ← Phase 3: training & evaluation script
+│   ├── prediction.py           ← Shared prediction utility (pipeline loader)
+│   ├── train_model_enhanced.py ← Primary training script (6 algorithms, 5-fold CV, XGBoost pipeline)
+│   ├── train_model.py          ← Legacy Phase 3 training script (3 algorithms)
 │   ├── data_preprocessing.py   ← Phase 2: splitting and preprocessing
 │   ├── eda.py                  ← Phase 2: EDA and chart generation
+│   ├── setup_model.py          ← Cloud cold-start bootstrap
 │   └── inspect_dataset.py      ← Phase 1: dataset audit script
 │
 ├── tests/
 │   ├── conftest.py                    ← Shared pytest fixtures
-│   ├── test_dataset.py                ← Dataset integrity tests (18 tests)
-│   ├── test_prediction_pipeline.py    ← Pipeline & prediction tests (27 tests)
-│   ├── test_model_metrics.py          ← Metrics & UI disclosure tests (32 tests)
-│   ├── test_project_integrity.py      ← Config & structure tests (27 tests)
+│   ├── test_dataset.py                ← Dataset integrity tests
+│   ├── test_prediction_pipeline.py    ← Pipeline & prediction tests
+│   ├── test_model_metrics.py          ← Metrics & UI disclosure tests
+│   ├── test_project_integrity.py      ← Config & structure tests
+│   ├── test_enhanced_ml.py            ← 6-algorithm comparison & CV tests (Phase 6+)
+│   ├── audit_metrics.py               ← End-to-end regression audit (97 checks)
 │   ├── verify_phase4.py               ← Standalone Phase 4 verification
 │   └── verify_runtime.py              ← Standalone runtime page logic check
 │
@@ -213,25 +222,27 @@ python src\data_preprocessing.py
 
 ### Step 2 — Train the Models
 
-This trains Logistic Regression, Decision Tree, and Random Forest on both Scenario A and Scenario B, saves `.joblib` pipeline files, generates SHAP plots, confusion matrices, and evaluation JSON/CSV:
+This trains all 6 classifiers (Logistic Regression, Decision Tree, Random Forest, ExtraTrees, LinearSVC, XGBoost)
+using 5-fold cross-validation on Scenario A and Scenario B, selects the best model by CV F1, saves a full
+sklearn Pipeline, generates permutation importance, ROC curves, CV results CSV, and evaluation JSON:
 
 ```powershell
-python src\train_model.py
+python src\train_model_enhanced.py
 ```
 
-> ⚠️ Training may take 2–5 minutes depending on hardware.
+> ⚠️ Training may take 3–7 minutes depending on hardware (6 algorithms + RandomizedSearchCV).
 
 ### Step 3 — Run Tests
 
 ```powershell
-# Full pytest suite (142 tests)
-python -m pytest tests/ -v
+# Full pytest suite (184 tests)
+python -m pytest tests/ -v --ignore=tests\verify_phase4.py --ignore=tests\verify_runtime.py
+
+# End-to-end audit (97 checks: pipeline, leakage, metrics, disclaimers)
+python tests\audit_metrics.py
 
 # Standalone Phase 4 verification (files, imports, syntax, metrics)
 python tests\verify_phase4.py
-
-# Standalone runtime logic check (all 5 page data paths)
-python tests\verify_runtime.py
 ```
 
 ### Step 4 — Launch the Dashboard
@@ -249,12 +260,16 @@ Then open **http://localhost:8501** in your browser.
 ### Scenario A — Primary (Leakage-Free)
 
 Features used: `Temperature`, `pH`, `Salinity`, `Turbidity`
+Selection: best **5-fold CV F1** on training data; evaluated exactly once on 2,000-sample test set.
 
-| Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC |
-|-------|----------|-----------|--------|----------|---------|
-| Logistic Regression | 50.40% | 50.37% | 48.40% | 49.37% | 50.18% |
-| Decision Tree | 50.10% | 50.09% | 52.00% | 51.03% | 50.07% |
-| **Random Forest ✅** | **51.35%** | **51.38%** | **50.30%** | **50.83%** | **51.41%** |
+| Model | CV F1 (mean±std) | Test Acc | Test F1 | ROC-AUC |
+|-------|-----------------|---------|---------|----------|
+| Logistic Regression | 0.4984 ± 0.0043 | 48.85% | 48.85% | 48.9% |
+| Decision Tree | 0.4880 ± 0.0095 | 50.65% | 50.22% | 50.3% |
+| Random Forest | 0.4962 ± 0.0057 | 49.70% | 49.61% | 49.8% |
+| ExtraTrees | 0.5003 ± 0.0048 | 50.60% | 50.60% | 50.3% |
+| LinearSVC | 0.5030 ± 0.0040 | 50.75% | 50.75% | 50.9% |
+| **XGBoost ✅** | **0.5069 ± 0.0045** | **51.45%** | **51.45%** | **50.3%** |
 
 > **Why ~51%?** The four Scenario A features have Pearson |r| < 0.01 with `is_safe`. The synthetic target is determined solely by the excluded threshold columns. Near-random performance is **expected and correct** — this confirms there is no leakage in Scenario A.
 
@@ -272,10 +287,12 @@ Features used: All 7 numerical features (including threshold-defining columns)
 
 ### Selected Model
 
-**Random Forest — Scenario A** (`models/selected_model_scenario_A.joblib`)
+**XGBoost — Scenario A** (`models/selected_model_scenario_A.joblib`)
 
-- Pipeline: `SimpleImputer (median) → StandardScaler → RandomForestClassifier(n_estimators=100, seed=42)`
+- Pipeline: `SimpleImputer (median) → StandardScaler → XGBClassifier(n_estimators=200, seed=42)`
+- Selected by: 5-fold CV F1 on 8,000 training samples
 - Train/Test split: 8,000 / 2,000 (80/20 stratified, seed=42)
+- Test accuracy: **51.45%** (near random; consistent with |r| < 0.01 feature-target correlation)
 - SHAP analysis: ✅ Computed on test set
 
 ---
@@ -409,7 +426,7 @@ Verify:
 | Limitation | Detail |
 |------------|--------|
 | **Synthetic data** | All 10,000 records are mathematically derived. Results cannot be generalised to real marine environments. |
-| **Near-random accuracy** | Scenario A model achieves ~51.35% — barely above chance — because safe features have negligible correlation with the synthetic target. |
+| **Near-random accuracy** | Scenario A model achieves ~51.45% — barely above chance — because safe features have negligible correlation with the synthetic target. |
 | **No temporal metadata** | Dataset has no timestamps or coordinates for time-series or geospatial analysis. |
 | **Single-site simulation** | No geographic variation; real oceans have spatially heterogeneous chemistry. |
 | **Binary target oversimplification** | Real water quality assessment is continuous and context-dependent. |
@@ -419,12 +436,12 @@ Verify:
 
 ## Future Scope
 
-- Validate the pipeline on real-world field-collected marine water quality datasets (e.g., ICES, OBIS).
-- Add geospatial visualisation (Folium/Plotly maps) if location metadata is available.
-- Explore gradient-boosted models (XGBoost, LightGBM) and neural networks.
-- Integrate temporal modelling (LSTM) for time-series water quality forecasting.
-- Deploy on Streamlit Community Cloud with authentication for restricted access.
+- Validate the pipeline on real-world field-collected marine water quality datasets (e.g., ICES, OBIS, Copernicus).
+- Add geospatial visualisation with real coordinate metadata if location data becomes available.
+- Explore neural network architectures (e.g., MLP, LSTM for time-series forecasting).
+- Deploy with authentication for restricted-access deployments.
 - Add DVC (Data Version Control) for large model artifact versioning.
+- Add probability calibration (Platt scaling or isotonic regression) to improve confidence estimates.
 
 ---
 
@@ -456,7 +473,8 @@ Project completed: October 2026
 | 1 | Dataset inspection, project structure | ✅ Complete |
 | 2 | EDA, preprocessing, feature engineering | ✅ Complete |
 | 3 | Model training, evaluation, SHAP | ✅ Complete |
-| 4 | Streamlit dashboard (5 sections) | ✅ Complete |
-| 5 | Integration & end-to-end testing (142 tests) | ✅ Complete |
-| 6 | GitHub repository setup | ✅ Complete |
-| 7 | Streamlit Community Cloud deployment | 🔜 Pending confirmation |
+| 4 | Streamlit dashboard (9 sections) | ✅ Complete |
+| 5 | Enhanced ML: 6-algorithm CV comparison, XGBoost pipeline | ✅ Complete |
+| 6 | Integration & end-to-end testing (184 tests, 97 audit checks) | ✅ Complete |
+| 7 | Trends & Anomalies, Decision Support, Map pages | ✅ Complete |
+| 8 | GitHub repository + Streamlit Community Cloud deployment | ✅ Complete |

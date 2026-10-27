@@ -15,7 +15,7 @@ Execution path:
 
 This runs ONCE and is cached by Streamlit. Subsequent reruns skip it.
 
-Estimated runtime: 60–120 seconds on cloud (200-tree Random Forest).
+Estimated runtime: 90–180 seconds on cloud (6-algorithm comparison + XGBoost pipeline).
 ──────────────────────────────────────────────────────────────────────────────
 """
 
@@ -27,7 +27,7 @@ ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 
 MODEL_A_PATH = os.path.join(ROOT, "models", "selected_model_scenario_A.joblib")
 PREPROC_SCRIPT = os.path.join(ROOT, "src", "data_preprocessing.py")
-TRAIN_SCRIPT   = os.path.join(ROOT, "src", "train_model.py")
+TRAIN_SCRIPT   = os.path.join(ROOT, "src", "train_model_enhanced.py")
 
 
 def model_exists() -> bool:
@@ -74,8 +74,8 @@ def ensure_model_ready() -> None:
     # Step 1 — preprocessing: split + scale + save pipeline joblibs + split CSVs
     run_script(PREPROC_SCRIPT, "data_preprocessing.py")
 
-    # Step 2 — training: train all models + save selected_model_scenario_A.joblib
-    run_script(TRAIN_SCRIPT, "train_model.py")
+    # Step 2 — enhanced training: 6-algorithm CV comparison, saves selected_model_scenario_A.joblib
+    run_script(TRAIN_SCRIPT, "train_model_enhanced.py")
 
     # Final check
     if not model_exists():

@@ -53,7 +53,7 @@ hr { border-color:#1e3a5f !important; }
 """, unsafe_allow_html=True)
 
 with st.sidebar:
-    st.markdown("## 🌊 Marine Water AI")
+    st.markdown("## 🌊 MarineGuard AI")
     st.markdown("---")
     st.markdown("**📊 Data Analytics** ← you are here")
     st.markdown("---")

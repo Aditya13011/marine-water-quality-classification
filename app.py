@@ -40,7 +40,7 @@ def _bootstrap_model():
     if not model_exists():
         # Only show the spinner UI during actual training
         with st.spinner(
-            "⏳ **First-time setup:** Training the Random Forest model from the raw "
+            "⏳ **First-time setup:** Training the production ML pipeline from the raw "
             "dataset. This takes ~60–120 s and will not repeat on future visits…"
         ):
             ensure_model_ready()
@@ -263,19 +263,24 @@ else:
     st.error("⚠️ Dataset file not found: data/marine_water_quality.csv")
 
 # ── selected model metrics ────────────────────────────────────────────────────
-st.markdown('<div class="section-heading">🤖 Selected Model — Random Forest (Scenario A)</div>',
+if meta:
+    _best = meta["scenario_A"]["best_model"]
+    _best_label = f"🤖 Selected Model — {_best} (Scenario A)"
+else:
+    _best = "RandomForest"
+    _best_label = "🤖 Selected Model — Scenario A"
+
+st.markdown(f'<div class="section-heading">{_best_label}</div>',
             unsafe_allow_html=True)
 
 if meta:
-    rf = meta["scenario_A"]["results"]["RandomForest"]
+    rf = meta["scenario_A"]["results"].get(_best, {})
     m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("Accuracy",  f"{rf['accuracy']*100:.2f}%")
-    m2.metric("Precision", f"{rf['precision']*100:.2f}%")
-    m3.metric("Recall",    f"{rf['recall']*100:.2f}%")
-    m4.metric("F1-Score",  f"{rf['f1_score']*100:.2f}%")
-    m5.metric("ROC-AUC",   f"{rf['roc_auc']*100:.2f}%")
-else:
-    st.warning("reports/model_metrics.json not found — run Phase 3 training first.")
+    m1.metric("Accuracy",  f"{rf.get('accuracy',0)*100:.2f}%")
+    m2.metric("Precision", f"{rf.get('precision',0)*100:.2f}%")
+    m3.metric("Recall",    f"{rf.get('recall',0)*100:.2f}%")
+    m4.metric("F1-Score",  f"{rf.get('f1_score',0)*100:.2f}%")
+    m5.metric("ROC-AUC",   f"{rf.get('roc_auc',0)*100:.2f}%")
 
 st.info(
     "ℹ️ **Honest performance context:** Scenario A accuracy (~51%) is near random chance. "
