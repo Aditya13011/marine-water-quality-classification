@@ -36,11 +36,20 @@ class TestPipelineLoading:
             f"Expected ['imputer','scaler','model'], got {steps}"
         )
 
-    def test_pipeline_model_is_random_forest(self):
-        pipe = load_pipeline()
+    def test_pipeline_model_is_valid_classifier(self):
+        """
+        Phase 2: best model is selected by CV F1 and may be RF, XGBoost,
+        ExtraTrees, LinSVC, etc. Accept any sklearn-compatible estimator.
+        """
+        pipe       = load_pipeline()
         model_name = type(pipe.named_steps["model"]).__name__
-        assert model_name == "RandomForestClassifier", (
-            f"Expected RandomForestClassifier, got {model_name}"
+        valid_names = {
+            "RandomForestClassifier", "XGBClassifier",
+            "ExtraTreesClassifier", "CalibratedClassifierCV",
+            "LogisticRegression", "DecisionTreeClassifier",
+        }
+        assert model_name in valid_names, (
+            f"Model '{model_name}' not in expected set {valid_names}"
         )
 
     def test_scaler_fitted_on_4_features(self):
@@ -78,6 +87,9 @@ class TestFeatureOrder:
     def test_pipeline_info_features_match(self):
         info = get_pipeline_info()
         assert info["features"] == FEATURES
+        # model_type can be any of the 6 trained classifiers
+        assert isinstance(info["model_type"], str)
+        assert len(info["model_type"]) > 0
 
 
 # ── Input validation ───────────────────────────────────────────────────────────

@@ -4,12 +4,14 @@ src/prediction.py
 Shared prediction utility for the Streamlit dashboard.
 Loads the Scenario A pipeline ONCE and provides a validated predict function.
 
-Pipeline: imputer → StandardScaler → RandomForestClassifier
-Features (exact order): Temperature, pH, Salinity, Turbidity
-Target mapping        : 0 = Unsafe, 1 = Safe
+Pipeline structure: imputer → StandardScaler → [best selected classifier]
+Best classifier  : Determined by 5-fold CV F1 on training data (Phase 2).
+                   May be RandomForest, XGBoost, ExtraTrees, LinearSVC, etc.
+Features (order) : Temperature, pH, Salinity, Turbidity
+Target mapping   : 0 = Unsafe, 1 = Safe
 
 IMPORTANT
-  The pipeline was fitted in Phase 2/3. It handles its own scaling.
+  The pipeline handles its own imputation and scaling.
   Do NOT pre-scale inputs before calling predict().
   Always pass a pd.DataFrame with correct column names to avoid sklearn warnings.
 ─────────────────────────────────────────────────────────────────────────────
@@ -52,10 +54,10 @@ def load_pipeline():
         if not os.path.isfile(MODEL_PATH):
             raise FileNotFoundError(
                 f"Model file not found: {MODEL_PATH}\n"
-                "Run src/train_model.py to regenerate it."
+                "Run src/train_model_enhanced.py (or src/train_model.py) to regenerate it."
             )
         _pipeline = joblib.load(MODEL_PATH)
-        # Validate pipeline structure
+        # Validate pipeline structure (any classifier is acceptable in the model step)
         steps = [n for n, _ in _pipeline.steps]
         assert steps == ["imputer", "scaler", "model"], \
             f"Unexpected pipeline steps: {steps}"
@@ -137,7 +139,7 @@ def get_pipeline_info() -> dict:
     return {
         "steps":          [n for n, _ in pipe.steps],
         "model_type":     type(pipe.named_steps["model"]).__name__,
-        "n_estimators":   pipe.named_steps["model"].n_estimators,
+        "n_estimators": getattr(pipe.named_steps["model"], "n_estimators", None),
         "features":       FEATURES,
         "scaler_mean":    dict(zip(FEATURES,
                                   pipe.named_steps["scaler"].mean_.round(3))),

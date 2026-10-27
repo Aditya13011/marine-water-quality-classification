@@ -1,0 +1,7 @@
+Model,CV Accuracy,CV F1 (weighted),CV ROC-AUC,Test Accuracy,Test F1,Test ROC-AUC,Train Time (s),Best Params,Selected
+LogisticRegression,49.85% ± 0.43%,0.4984 ± 0.0043,0.4973 ± 0.0067,48.85%,0.4885,0.4848,7.67,{'C': 0.01},
+DecisionTree,49.51% ± 1.04%,0.4880 ± 0.0095,0.4991 ± 0.0088,50.65%,0.5022,0.4926,0.66,"{'min_samples_leaf': 20, 'max_depth': 8}",
+RandomForest,49.65% ± 0.56%,0.4962 ± 0.0057,0.4954 ± 0.0078,49.70%,0.4961,0.5036,65.3,"{'n_estimators': 300, 'min_samples_leaf': 2, 'max_features': 'log2', 'max_depth': 10}",
+ExtraTrees,50.05% ± 0.47%,0.5003 ± 0.0048,0.4979 ± 0.0059,50.60%,0.5060,0.4987,33.65,"{'n_estimators': 100, 'min_samples_leaf': 1, 'max_features': 'sqrt', 'max_depth': 5}",
+LinearSVC,50.31% ± 0.40%,0.5030 ± 0.0040,0.5012 ± 0.0061,50.75%,0.5075,0.5084,0.85,{'estimator__C': 0.01},
+XGBoost,50.69% ± 0.46%,0.5069 ± 0.0045,0.5047 ± 0.0069,51.45%,0.5145,0.5029,11.18,"{'subsample': 0.8, 'n_estimators': 200, 'max_depth': 5, 'learning_rate': 0.1, 'colsample_bytree': 0.8}",✅

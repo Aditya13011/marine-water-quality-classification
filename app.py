@@ -16,7 +16,7 @@ import pandas as pd
 
 # ── page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Marine Water Quality AI",
+    page_title="MarineGuard AI — Marine Water Quality",
     page_icon="🌊",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -191,14 +191,19 @@ hr { border-color: #1e3a5f !important; }
 
 # ── sidebar nav ───────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🌊 Marine Water AI")
+    st.markdown("## 🌊 MarineGuard AI")
     st.markdown("---")
     st.markdown("""
 **Navigation**
 - 🏠 **Home** ← you are here
-- 🔬 **Prediction**
+- 🔬 **Water Quality Prediction**
 - 📊 **Data Analytics**
 - 📈 **Model Performance**
+- 🧪 **Model Laboratory** *(new)*
+- 🌐 **Marine Data Sources** *(new)*
+- 🗺️ **Marine Monitoring Map** *(new)*
+- 📡 **Trends & Anomalies** *(new)*
+- 🎯 **Decision Support** *(new)*
 - ℹ️ **About Project**
 
 Use the page list above ↑ to navigate.
@@ -208,15 +213,15 @@ Use the page list above ↑ to navigate.
 <div style='font-size:0.78rem; color:#64748b; line-height:1.6;'>
 <b>Dataset</b><br>Zenodo 19506986<br>
 <b>Records</b>: 10,000 (synthetic)<br>
-<b>Model</b>: RandomForest (Scenario A)<br>
-<b>Phase</b>: 4 — Dashboard
+<b>Best model</b>: XGBoost (Scenario A)<br>
+<b>Phases</b>: 1–9 complete
 </div>
 """, unsafe_allow_html=True)
 
 # ── hero ──────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero-card">
-  <div class="hero-title">🌊 AI-Based Marine Water Quality<br>Classification System</div>
+  <div class="hero-title">🌊 MarineGuard AI<br><span style='font-size:1.6rem;'>Marine Water Quality Intelligence Platform</span></div>
   <div class="hero-sub">
     Machine-learning classification of marine water samples as <b>Safe</b> or <b>Unsafe</b>
     using physicochemical indicators — with full transparency about model limitations.
@@ -323,14 +328,18 @@ All other samples are **Unsafe (0)**.
 st.markdown('<div class="section-heading">📌 Project Phase Status</div>',
             unsafe_allow_html=True)
 phases = [
-    ("1", "Dataset Download & Inspection",              "✅ Complete"),
-    ("2", "EDA, Feature Engineering & Preprocessing",  "✅ Complete"),
-    ("3", "Model Training, Evaluation & SHAP",          "✅ Complete"),
-    ("4", "Streamlit Dashboard",                        "✅ Complete"),
+    ("1", "Stabilise & Bug Fixes",              "✅ Complete"),
+    ("2", "Enhanced ML (6 models + CV)",         "✅ Complete"),
+    ("3", "Real Data Integration",               "✅ Complete"),
+    ("4", "Marine Monitoring Map",               "✅ Complete"),
+    ("5", "Trends & Anomaly Detection",          "✅ Complete"),
+    ("6", "Decision Support & Reports",          "✅ Complete"),
+    ("7", "UI/UX Redesign",                      "✅ Complete"),
+    ("8", "Testing Suite",                       "🔄 In Progress"),
 ]
 ph_cols = st.columns(4)
 for i, (num, desc, status) in enumerate(phases):
-    with ph_cols[i]:
+    with ph_cols[i % 4]:
         st.markdown(f"""
 <div style='background:#0f2744; border:1px solid #1e4d7a; border-radius:10px;
             padding:16px; text-align:center;'>
@@ -344,8 +353,8 @@ st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("---")
 st.markdown(
     "<div style='text-align:center; color:#475569; font-size:0.78rem;'>"
-    "AI-Based Marine Water Quality Classification System · "
-    "Dataset: Zenodo 19506986 (Synthetic) · Python + Streamlit + Scikit-learn"
+    "MarineGuard AI · Marine Water Quality Intelligence Platform · "
+    "Dataset: Zenodo 19506986 (Synthetic) · Python + Streamlit + Scikit-learn + XGBoost"
     "</div>",
     unsafe_allow_html=True
 )
